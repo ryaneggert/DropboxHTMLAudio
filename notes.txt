@@ -1,0 +1,17 @@
+In order to make the file dialog work in a virtualenv, be sure to copy the "tcl" folder from C://Python## and paste it in the root of the virtualenv. 
+
+Make sure the audio files are named properly before running the script. The name of an audio file will drive the filename of the html document. 
+
+Audio filenames should take the form "songx_[variation level](_[variation type, if any]y).mp3" where [variation level] is replaced with "low", "mod", or "high", 
+and where [variation type, if any] is replaced by a variation type descriptor (e.g. 'mel' for 'melodic' variation) if applicable. When no variation type (e.g. 'melodic') is specified,
+"remix" variation is assumed. x denotes the song number; this can be determined by checking "SongNumbersandIdentities.txt". y denotes the variation number; in the case of
+multiple variations of the same song and level, this number is used to differentiate between them.
+
+example 'good' audio filenames:
+song5_low_mel2.mp3  (the 2nd low melodic variation of song #5)
+song2_high.mp3		(the high variation of song #2)
+song14_mod_4.mp3	(the fourth moderate variation of song #14)
+
+Be sure to update SongNumbersandIdentities.txt upon the addition of an entirely new song. 
+
+The song number you specify will be used to name the html file

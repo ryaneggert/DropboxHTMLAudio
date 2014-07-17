@@ -1,5 +1,20 @@
 import dropbox
 import webbrowser
+import Tkinter as tk
+import tkFileDialog
+
+
+def dbLinkTransform(inLink):
+    """
+    takes a input dropbox link [inLink] (string) of form
+    "https://www.dropbox.com/.../filename.txt"
+    and transforms it to the direct link of form
+    "https://dl.dropboxusercontent.com/.../filename.txt".
+    This is output as a string.
+    """
+    outLink = inLink.replace('www.dropbox','dl.dropboxusercontent')
+    return outLink
+
 
 
 # Import app key and secret from external file
@@ -31,11 +46,43 @@ if whichDB == 'n':
 
     # This will fail if the user enters an invalid authorization code
     access_token, user_id = flow.finish(code)
+
 else:
     # Use the mockups dropbox account. We already have the access token
     access_token = authDict['CVaccesstoken']
 
+# Construct a dropbox client instance 
 client = dropbox.client.DropboxClient(access_token)
 print 'linked account: ', client.account_info()
 
+# Select audio files
+audioFileNames = []
+root = tk.Tk()
+root.withdraw()
+audioFilePaths = tkFileDialog.askopenfilenames(title='Select audio files')
+audioFilePathsList = root.tk.splitlist(audioFilePaths)
+for item in audioFilePathsList:
+    print item
+    dontCare, audioFileName = item.rsplit('/', 1)
+    audioFileNames.append(audioFileName)
+    print "Opening", audioFileName
+    with open(item, 'rb') as audioUpload:
+        print "Uploading", audioFileName
+        uploadResponse = client.put_file('Audioplayer/audio files/'+audioFileName, audioUpload)
 
+# Get audio file links
+
+
+# Transform audio links
+
+
+# Add links to HTML template
+
+
+# Get HTML document links
+
+
+# Transform HTML links
+
+
+#Output transformed HTML links
