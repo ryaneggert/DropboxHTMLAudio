@@ -57,6 +57,7 @@ print 'linked account: ', client.account_info()
 
 # Select audio files
 audioFileNames = []
+audioDropboxPaths = []
 root = tk.Tk()
 root.withdraw()
 audioFilePaths = tkFileDialog.askopenfilenames(title='Select audio files')
@@ -65,18 +66,25 @@ for item in audioFilePathsList:
     print item
     dontCare, audioFileName = item.rsplit('/', 1)
     audioFileNames.append(audioFileName)
+    audioDropboxPaths.append('Audioplayer/audio files/'+audioFileName)
     print "Opening", audioFileName
     with open(item, 'rb') as audioUpload:
         print "Uploading", audioFileName
-        uploadResponse = client.put_file('Audioplayer/audio files/'+audioFileName, audioUpload)
+        uploadResponse = client.put_file(audioDropboxPaths[-1], audioUpload)
 
-# Get audio file links
+# Get & transform audio file links
+audioLinks = []
+for item in audioDropboxPaths:
+    resdict = client.share(item, short_url=False)
+    x, dirtyLink = resdict.items()[0]
+    cleanLink = str(dirtyLink)
+    audioLinks.append(dbLinkTransform(cleanLink))
 
-
-# Transform audio links
-
+print audioLinks
 
 # Add links to HTML template
+#Open dropbox html template
+
 
 
 # Get HTML document links
