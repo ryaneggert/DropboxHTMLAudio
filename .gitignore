@@ -215,4 +215,5 @@ $RECYCLE.BIN/
 
 # Custom
 # =========================
-DropboxHTMLAudio\env\
+/DropboxHTMLAudio/env/
+auth.txt
