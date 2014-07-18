@@ -2,6 +2,7 @@ import dropbox
 import webbrowser
 import Tkinter as tk
 import tkFileDialog
+import re
 
 
 def dbLinkTransform(inLink):
@@ -15,6 +16,68 @@ def dbLinkTransform(inLink):
     outLink = inLink.replace('www.dropbox','dl.dropboxusercontent')
     return outLink
 
+def getAudioFileInfo(audioFileDBLink):
+    """
+    Takes in direct Dropbox link of the form https://dl.dropboxusercontent.com/.../filename.filetype
+    """
+
+    # Reset variable values
+    SongNumber = ''
+    VariationLevel = ''
+    VariationType = ''
+    VariationNumber = ''
+    fileType = ''
+
+    #Remove all but filename.filetype
+    dontcare2,audioFileName = audioFileDBLink.rsplit('/', 1)
+    
+
+    #Split the filename.filetype
+    splitFileName = re.split("[_\.]", audioFileName)
+    numFileNameParts = len(splitFileName)
+    fileType = splitFileName[-1] # The last item in the list will be the filetype (e.g. mp3, wav)
+    # insert error checker here?
+    SongNumber = getSongNumber(splitFileName[0])
+    VariationLevel = getVarLevel(splitFileName[1])
+    if numFileNameParts == 4:
+        if splitFileName[2].isalpha():
+            # It is a variation type
+            VariationType = getVarType(splitFileName[2])
+        else:
+            #It is a variation number
+            VariationNumber = getVarNum(splitFileName[2])
+    
+    if numFileNameParts == 5:
+        VariationType = getVarType(splitFileName[2])
+        VariationNumber = getVarNum(splitFileName[3])
+
+    #HTML filename synthesis
+    htmlFileName = "play"+ VariationLevel + VariationNumber + VariationType + "song" + SongNumber + ".html"
+    return htmlFileName
+
+def getSongNumber(fn):
+    sn =  fn.strip('song')
+    return sn
+
+def getVarLevel(fn):
+    vl = fn
+    return vl + '_'
+
+def getVarType(fn):
+    vt = fn
+    return vt + '_'
+
+def getVarNum(fn):
+    vn = fn
+    return vn + '_'
+
+    
+
+def futureErrorChecker():
+    match = re.match('song\d+', splitFileName[0])
+    if match:
+        sn =  splitFileName[0].strip('song')
+    return True
 
 
 # Import app key and secret from external file
@@ -25,7 +88,6 @@ with open("auth.txt") as allAuth:
         authDict[elementName] = element
 elementName = None
 element = None
-print authDict.keys()
 
 # Get your app key and secret from the Dropbox developer website
 app_key = authDict['app_key']
@@ -82,11 +144,26 @@ for item in audioDropboxPaths:
 
 print audioLinks
 
+# Create HTML filenames from audio filenames
+filenames = {}
+for item in audioLinks:
+    htmlName = getAudioFileInfo(item)
+    filenames[item] = htmlName # filenames is a dictionary with audio dropbox direct link keys and html file values
+
 # Add links to HTML template
-#Open dropbox html template
+# Open dropbox html template
+templateObject = client.get_file('Audioplayer/template/htmlaudiotemplate.html')
+template = templateObject.read()
 
 
+with client.get_file('Audioplayer/template/htmlaudiotemplate.html') as templateObject:
+    template = templateObject.read()
+    for key in filenames:
+        updatedTemplate = template.replace('INSERTDROPBOXDIRECTLINKHERE', key)
+        print "Uploading to \"Audioplayer/HTML files/" + filenames[key] + "\""
+        uploadhtmlResponse = client.put_file('Audioplayer/HTML files/'+ filenames[key], updatedTemplate)
 
+    
 # Get HTML document links
 
 

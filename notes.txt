@@ -8,10 +8,14 @@ and where [variation type, if any] is replaced by a variation type descriptor (e
 multiple variations of the same song and level, this number is used to differentiate between them.
 
 example 'good' audio filenames:
-song5_low_mel2.mp3  (the 2nd low melodic variation of song #5)
+song5_low_mel_2.mp3  (the 2nd low melodic variation of song #5)
 song2_high.mp3		(the high variation of song #2)
 song14_mod_4.mp3	(the fourth moderate variation of song #14)
 
+Song number (e.g. 'song4', 'song156') and variation level (e.g. 'low', 'mod') must be included. Variation type (e.g. 'mel', 'fullsong') and variation number (e.g. '2', '24') are optional. 
+
+Make sure the filename contains no '.', no '/'. Windows already checks for the '/'.
+	
 Be sure to update SongNumbersandIdentities.txt upon the addition of an entirely new song. 
 
-The song number you specify will be used to name the html file
+The .mp3 file name will be used to name the html file, so adherence to the above naming convention is very helpful for organization.
