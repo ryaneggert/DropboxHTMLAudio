@@ -5,6 +5,7 @@ import tkFileDialog
 import re
 
 
+
 def dbLinkTransform(inLink):
     """
     takes a input dropbox link [inLink] (string) of form
@@ -29,9 +30,8 @@ def getAudioFileInfo(audioFileDBLink):
     fileType = ''
 
     #Remove all but filename.filetype
-    dontcare2,audioFileName = audioFileDBLink.rsplit('/', 1)
-    
-
+    dontcare2, audioFileName = audioFileDBLink.rsplit('/', 1)
+ 
     #Split the filename.filetype
     splitFileName = re.split("[_\.]", audioFileName)
     numFileNameParts = len(splitFileName)
@@ -72,13 +72,11 @@ def getVarNum(fn):
     return vn + '_'
 
     
-
 def futureErrorChecker():
     match = re.match('song\d+', splitFileName[0])
     if match:
         sn =  splitFileName[0].strip('song')
     return True
-
 
 # Import app key and secret from external file
 authDict = dict()
@@ -115,7 +113,14 @@ else:
 
 # Construct a dropbox client instance 
 client = dropbox.client.DropboxClient(access_token)
-print 'linked account: ', client.account_info()
+linkedAccountInfo = client.account_info()
+
+print "Linked account --"
+
+for key in linkedAccountInfo:
+    print '\t' + key + " : " + str(linkedAccountInfo[key])
+
+print
 
 # Select audio files
 audioFileNames = []
@@ -125,7 +130,7 @@ root.withdraw()
 audioFilePaths = tkFileDialog.askopenfilenames(title='Select audio files')
 audioFilePathsList = root.tk.splitlist(audioFilePaths)
 for item in audioFilePathsList:
-    print item
+    print '\n' + item
     dontCare, audioFileName = item.rsplit('/', 1)
     audioFileNames.append(audioFileName)
     audioDropboxPaths.append('Audioplayer/audio files/'+audioFileName)
@@ -142,8 +147,6 @@ for item in audioDropboxPaths:
     cleanLink = str(dirtyLink)
     audioLinks.append(dbLinkTransform(cleanLink))
 
-print audioLinks
-
 # Create HTML filenames from audio filenames
 filenames = {}
 for item in audioLinks:
@@ -155,19 +158,48 @@ for item in audioLinks:
 templateObject = client.get_file('Audioplayer/template/htmlaudiotemplate.html')
 template = templateObject.read()
 
-
+HTMLDropboxPaths = []
+print '\nUploading HTML files...'
 with client.get_file('Audioplayer/template/htmlaudiotemplate.html') as templateObject:
     template = templateObject.read()
     for key in filenames:
         updatedTemplate = template.replace('INSERTDROPBOXDIRECTLINKHERE', key)
-        print "Uploading to \"Audioplayer/HTML files/" + filenames[key] + "\""
-        uploadhtmlResponse = client.put_file('Audioplayer/HTML files/'+ filenames[key], updatedTemplate)
+        HTMLDropboxPaths.append('Audioplayer/HTML files/'+ filenames[key])
+        print "\nUploading to \"Audioplayer/HTML files/" + filenames[key] + "\""
+        uploadhtmlResponse = client.put_file(HTMLDropboxPaths[-1], updatedTemplate)
+        
 
     
-# Get HTML document links
+# Get & transform HTML document links
+HTMLLinks = []
+for item in HTMLDropboxPaths:
+    resdict = client.share(item, short_url=False)
+    x, dirtyLink = resdict.items()[0]
+    cleanLink = str(dirtyLink)
+    HTMLLinks.append(dbLinkTransform(cleanLink))
+
+# Output transformed HTML links
+
+# Text file
+outputTextFile = open("OutputLinks.txt", 'w+')
+HTMLLinksNewlines = [x + '\n' for x in HTMLLinks]
+audioLinksNewlines = [x + '\n' for x in audioLinks]
+outputTextFile.write("-" * 30 + "LINKS TO HTML FILES" + "-" * 31 + '\n')
+outputTextFile.writelines(HTMLLinksNewlines)
+outputTextFile.write('-' * 80 + '\n' *2)
+outputTextFile.write("-" * 30 + "LINKS TO AUDIO FILES" + "-" * 30 + '\n')
+outputTextFile.writelines(audioLinksNewlines)
+outputTextFile.write('-' * 80)
+outputTextFile.close()
 
 
-# Transform HTML links
+# Console display
+print '\n'* 10
+print "-" * 30 + "LINKS TO HTML FILES" + "-" * 31
+print
+for item in HTMLLinks:
+    print item
 
-
-#Output transformed HTML links
+print '-' * 80
+print '\n' * 3
+print "For a text file of these output links, please see \"OutputLinks.txt\" \n in this script's root directory"
